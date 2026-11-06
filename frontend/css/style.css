@@ -1,0 +1,771 @@
+/* style.css — Design tokens, base styles, and landing page sections */
+
+/* ── Design Tokens ─────────────────────────────────────────────── */
+
+:root {
+  --bg: #dedad3;
+  --surface: #d3cec6;
+  --ink: #0a0a0a;
+  --muted: #5c5852;
+  --accent: #256f82;
+  --accent-ink: #ffffff;
+
+  --font-display: 'Boska', Georgia, 'Times New Roman', serif;
+  --font-text: 'Boska', Georgia, 'Times New Roman', serif;
+
+  --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+  --step-display: clamp(2.5rem, 1.5rem + 4.5vw, 5rem);
+
+  --margin: 20px;
+  --gap: 12px;
+  --section-gap: clamp(60px, 8vw, 120px);
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration: 0.6s;
+}
+
+/* ── Reset & Base ──────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable both-edges;
+}
+
+body {
+  font-family: var(--font-text);
+  font-size: var(--step-body);
+  line-height: 1.55;
+  color: var(--ink);
+  background-color: var(--bg);
+  min-height: 100svh;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--ink);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+/* ── Typography ────────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+h1 {
+  font-size: var(--step-display);
+}
+
+h2 {
+  font-size: var(--step-head);
+}
+
+h3 {
+  font-size: var(--step-lead);
+}
+
+p {
+  color: var(--ink);
+}
+
+.text-muted { color: var(--muted); }
+
+/* ── Layout ────────────────────────────────────────────────────── */
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--margin);
+}
+
+.container--narrow {
+  max-width: 480px;
+}
+
+/* ── Screens ───────────────────────────────────────────────────── */
+
+.screen {
+  display: none;
+  min-height: 100svh;
+}
+
+.screen--active {
+  display: block;
+}
+
+/* ── Navigation ────────────────────────────────────────────────── */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--bg);
+  height: 56px;
+}
+
+.nav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--margin);
+}
+
+.nav__logo {
+  font-family: var(--font-display);
+  font-size: var(--step-body);
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+}
+
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Hero Section — "Striped card beside the room" ─────────────── */
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: calc(56px + var(--margin)) var(--margin) var(--margin);
+  min-height: 100svh;
+}
+
+.hero__card {
+  background: var(--surface);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: calc(100svh - 56px - var(--margin) * 2);
+}
+
+.hero__band {
+  display: flex;
+  height: 56px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border-radius: 16px 16px 0 0;
+}
+
+.hero__bar {
+  width: 28px;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.hero__bar:nth-child(odd) {
+  background: var(--ink);
+}
+
+.hero__bar:nth-child(even) {
+  background: var(--bg);
+}
+
+.hero__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.hero__wordmark {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--step-body);
+  color: var(--muted);
+  margin-bottom: 32px;
+  letter-spacing: 0.02em;
+}
+
+.hero h1 {
+  font-size: var(--step-display);
+  line-height: 1.08;
+  margin-bottom: 20px;
+  max-width: 14ch;
+}
+
+.hero__sentence {
+  font-size: var(--step-body);
+  color: var(--ink);
+  max-width: 36ch;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.hero__links {
+  display: flex;
+  gap: 24px;
+  margin-top: auto;
+  padding-bottom: 0;
+}
+
+.hero__links a {
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+
+.hero__links a:hover {
+  color: var(--ink);
+}
+
+.hero__photo {
+  position: sticky;
+  top: calc(56px + var(--margin));
+  height: calc(100svh - 56px - var(--margin) * 2);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.hero__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Section 1: How it Works — "Itinerary on a slip" ──────────── */
+
+.howit {
+  padding: var(--section-gap) var(--margin);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.howit__grid {
+  display: grid;
+  grid-template-columns: 5fr 1fr 5fr;
+  gap: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+.howit__text {
+  grid-column: 1;
+  padding-top: 40px;
+}
+
+.howit__text h2 {
+  margin-bottom: 24px;
+}
+
+.howit__text p {
+  max-width: 30ch;
+  line-height: 1.55;
+}
+
+.howit__slip-area {
+  grid-column: 3;
+  display: flex;
+  justify-content: center;
+}
+
+.howit__slip {
+  width: clamp(320px, 40vw, 480px);
+  background: var(--surface);
+  padding: 32px 28px 0;
+  clip-path: polygon(
+    0% 0%, 100% 0%, 100% calc(100% - 12px),
+    95% 100%, 90% calc(100% - 12px),
+    85% 100%, 80% calc(100% - 12px),
+    75% 100%, 70% calc(100% - 12px),
+    65% 100%, 60% calc(100% - 12px),
+    55% 100%, 50% calc(100% - 12px),
+    45% 100%, 40% calc(100% - 12px),
+    35% 100%, 30% calc(100% - 12px),
+    25% 100%, 20% calc(100% - 12px),
+    15% 100%, 10% calc(100% - 12px),
+    5% 100%, 0% calc(100% - 12px)
+  );
+  padding-bottom: 24px;
+}
+
+.slip__section {
+  margin-bottom: 24px;
+}
+
+.slip__time {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--step-small);
+  color: var(--muted);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+}
+
+.slip__row {
+  display: flex;
+  align-items: baseline;
+  font-size: var(--step-small);
+  color: var(--ink);
+  padding: 6px 0;
+}
+
+.slip__row span:first-child {
+  flex-shrink: 0;
+}
+
+.slip__row span:last-child {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+
+.slip__dots {
+  flex: 1;
+  margin: 0 8px;
+  border-bottom: 2px dotted var(--muted);
+  position: relative;
+  top: -3px;
+  opacity: 0.4;
+}
+
+.slip__final {
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--step-small);
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px -28px 0;
+}
+
+/* ── Section 2: Features — "Stacking colour sheets" ───────────── */
+
+.features {
+  padding: var(--section-gap) 0 0;
+}
+
+.features__heading {
+  max-width: 1400px;
+  margin: 0 auto 48px;
+  padding: 0 var(--margin);
+}
+
+.features__stack {
+  position: relative;
+}
+
+.features__sheet {
+  position: sticky; /* taste-skill-ignore: covered-text — stacking sheets intentionally overlap previous sheet content */
+  min-height: 70svh;
+  border-radius: 28px 28px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.features__sheet--surface {
+  top: 0;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.features__sheet--ink {
+  top: 72px;
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.features__sheet--accent {
+  top: 144px;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.sheet__top {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--margin);
+  flex-shrink: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.sheet__name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--step-head);
+}
+
+.sheet__content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  padding: 40px var(--margin) 60px;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.sheet__desc {
+  max-width: 40ch;
+  font-size: var(--step-body);
+  line-height: 1.5;
+  align-self: end;
+  color: inherit;
+}
+
+.features__sheet--ink .sheet__desc {
+  color: var(--bg);
+}
+
+.features__sheet--accent .sheet__desc {
+  color: var(--accent-ink);
+}
+
+.sheet__ui {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+/* Product UI fragment styles are in components.css */
+
+/* ── Section 3: Team — "Founder's letter" ──────────────────────── */
+
+.letter {
+  padding: var(--section-gap) var(--margin);
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.letter__heading {
+  font-size: var(--step-lead);
+  color: var(--muted);
+  margin-bottom: 32px;
+}
+
+.letter__paper {
+  width: 100%;
+  max-width: 640px;
+  background: var(--surface);
+  padding: 60px;
+  position: relative;
+}
+
+.letter__paper::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -14px;
+  height: 15px;
+  /* scallop edge — radial-gradient is a shaped cut, not decoration */
+  background: radial-gradient( /* taste-skill-ignore */
+    circle 10px at 20px 0,
+    var(--bg) 9px,
+    transparent 10px
+  );
+  background-size: 40px 15px;
+  background-repeat: repeat-x;
+}
+
+.letter__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--step-small);
+  margin-bottom: 32px;
+}
+
+.letter__body p {
+  font-size: var(--step-body);
+  line-height: 1.55;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.letter__body p:last-child {
+  margin-bottom: 0;
+}
+
+.letter__sign {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--step-lead);
+  color: var(--ink);
+  margin-top: 32px;
+}
+
+.letter__names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.letter__names span {
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+
+.letter__dots {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 0;
+}
+
+.letter__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: 0.4;
+}
+
+.letter__tear {
+  width: 100%;
+  max-width: 640px;
+  height: 72px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.letter__tear a {
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+
+.letter__tear a:hover {
+  color: var(--ink);
+}
+
+/* ── Section 4: CTA — "Three photographs, then a field" ────────── */
+
+.cta__photos {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+}
+
+.cta__photos img {
+  width: 100%;
+  height: 40svh;
+  object-fit: cover;
+}
+
+.cta__band {
+  background: var(--accent);
+  min-height: 44svh;
+  display: flex;
+  align-items: center;
+  padding: 60px var(--margin);
+}
+
+.cta__text {
+  font-family: var(--font-display);
+  font-size: var(--step-lead);
+  line-height: 1.4;
+  color: var(--accent-ink);
+  max-width: 58%;
+}
+
+.cta__link {
+  color: var(--accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 4px;
+  text-decoration-color: var(--accent-ink);
+}
+
+.cta__link:hover {
+  color: var(--bg);
+  text-decoration-color: var(--bg);
+}
+
+/* ── Section 5: Footer — "A footer of tiles" ──────────────────── */
+
+.footer {
+  padding: 0 var(--margin) var(--margin);
+}
+
+.footer__upper {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.footer__tile {
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+}
+
+.footer__tile--statement {
+  grid-column: 1 / 5;
+  height: 220px;
+}
+
+.footer__text {
+  font-family: var(--font-display);
+  font-size: var(--step-lead);
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.footer__legal {
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+
+.footer__tile--nav {
+  grid-column: 5 / 8;
+  height: 220px;
+  gap: 8px;
+}
+
+.footer__tile--nav a {
+  font-size: var(--step-small);
+  color: var(--ink);
+}
+
+.footer__tile--nav a:hover {
+  color: var(--accent);
+}
+
+.footer__tile--info {
+  grid-column: 8 / 10;
+  height: 220px;
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+
+.footer__tile--contact {
+  grid-column: 10 / 13;
+  height: 220px;
+  justify-content: center;
+}
+
+.footer__tile--contact a {
+  font-size: var(--step-body);
+  color: var(--ink);
+  word-break: break-all;
+}
+
+.footer__lower {
+  display: grid;
+  grid-template-columns: 8fr 4fr;
+  gap: 8px;
+}
+
+.footer__tile--wordmark {
+  grid-column: 1;
+  height: 320px;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--step-display);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer__tile--cta {
+  grid-column: 2;
+  height: 320px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--step-lead);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.footer__tile--cta:hover {
+  background: #1e5f70;
+}
+
+.footer__tile--cta svg {
+  align-self: flex-end;
+}
+
+/* ── Utility ───────────────────────────────────────────────────── */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

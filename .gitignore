@@ -1,0 +1,21 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.db
+*.db-shm
+*.db-wal
+
+# Node / frontend
+node_modules/
+.env
+.env.local
+
+# graphify
+graphify-out/
+
+# OS
+.DS_Store
+Thumbs.db

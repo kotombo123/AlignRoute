@@ -1,0 +1,205 @@
+/* animations.css — Motion layer: crossfade, stagger, swipe, entrance */
+
+/* ── Keyframes ─────────────────────────────────────────────────── */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ── Hero Photo Crossfade ─────────────────────────────────────── */
+
+@keyframes heroFade {
+  0%   { opacity: 0; }
+  8%   { opacity: 1; }
+  30%  { opacity: 1; }
+  38%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.hero__img {
+  opacity: 0;
+  animation: heroFade 18s var(--ease) infinite;
+}
+
+.hero__img:nth-child(1) {
+  animation-delay: 0s;
+  opacity: 1;
+}
+
+.hero__img:nth-child(2) {
+  animation-delay: 6s;
+}
+
+.hero__img:nth-child(3) {
+  animation-delay: 12s;
+}
+
+/* ── Section Entrance Animations ──────────────────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  .entrance {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity var(--duration) var(--ease),
+                transform var(--duration) var(--ease);
+  }
+}
+
+.entrance--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger delays for children */
+@media (prefers-reduced-motion: no-preference) {
+  .entrance[data-delay="1"] { transition-delay: 60ms; }
+  .entrance[data-delay="2"] { transition-delay: 120ms; }
+  .entrance[data-delay="3"] { transition-delay: 180ms; }
+  .entrance[data-delay="4"] { transition-delay: 240ms; }
+  .entrance[data-delay="5"] { transition-delay: 300ms; }
+}
+
+/* ── Animation Classes ────────────────────────────────────────── */
+
+.animate-fade-in {
+  animation: fadeIn 0.4s var(--ease) both;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s var(--ease) both;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.3s var(--ease) both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s var(--ease) both;
+}
+
+/* Stagger children */
+.stagger-children > * {
+  animation: fadeInUp 0.5s var(--ease) both;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 70ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 140ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 210ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 280ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 350ms; }
+
+/* ── Card Swipe Animations ────────────────────────────────────── */
+
+.card-enter {
+  animation: slideUp 0.35s var(--ease) both;
+}
+
+@keyframes cardExitLeft {
+  to {
+    transform: translateX(-150%) rotate(-30deg);
+    opacity: 0;
+  }
+}
+
+@keyframes cardExitRight {
+  to {
+    transform: translateX(150%) rotate(30deg);
+    opacity: 0;
+  }
+}
+
+.card-exit-left {
+  animation: cardExitLeft 0.4s var(--ease) both;
+}
+
+.card-exit-right {
+  animation: cardExitRight 0.4s var(--ease) both;
+}
+
+@keyframes cardPromote {
+  from { transform: scale(0.95) translateY(8px); }
+  to { transform: scale(1) translateY(0); }
+}
+
+.card-promote {
+  animation: cardPromote 0.3s var(--ease) both;
+}
+
+/* ── Button Feedback ──────────────────────────────────────────── */
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* ── Pulse Dot (lobby waiting) ────────────────────────────────── */
+
+.pulse-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.5s ease infinite;
+  margin-right: 8px;
+}
+
+/* ── Screen Transition ────────────────────────────────────────── */
+
+.screen--active {
+  animation: fadeIn 0.3s var(--ease) both;
+}
+
+/* ── Reduced Motion ───────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .hero__img {
+    animation: none !important;
+  }
+
+  .hero__img:first-child {
+    opacity: 1 !important;
+  }
+
+  .hero__img:nth-child(n+2) {
+    opacity: 0 !important;
+  }
+
+  .entrance {
+    opacity: 1;
+    transform: none;
+  }
+}

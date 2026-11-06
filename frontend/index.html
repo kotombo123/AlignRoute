@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlignRoute</title>
+  <meta name="description" content="One route for the whole group. Pick a destination, swipe the cards, and AI builds your day-by-day plan.">
+  <meta name="theme-color" content="#dedad3">
+
+  <!-- Fonts: Boska from Fontshare -->
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=boska@400,401,500&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
+  <!-- Runtime config (ngrok URLs etc.) -->
+  <script src="config.js"></script>
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/screens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav__inner">
+      <div class="nav__logo" id="nav-logo" role="button" tabindex="0"
+           aria-label="AlignRoute home">AlignRoute</div>
+      <div class="nav__actions">
+        <button class="btn btn--lang" id="lang-toggle" type="button"
+                aria-label="Switch language" data-i18n="nav.language">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- SCREEN 1 — Landing Page -->
+  <div class="screen screen--active" id="screen-landing" aria-hidden="false">
+
+    <!-- Hero: Striped card beside the room -->
+    <section class="hero">
+      <div class="hero__card">
+        <div class="hero__band" aria-hidden="true">
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+          <div class="hero__bar"></div><div class="hero__bar"></div>
+        </div>
+
+        <div class="hero__content">
+          <h1 class="entrance" data-i18n="hero.headline">Jedna trasa dla całej grupy</h1>
+          <p class="hero__sentence entrance" data-delay="1" data-i18n="hero.sentence">Wybierz destynację, przesuń karty, a AI ułoży plan dnia po dniu.</p>
+          <button class="btn btn--primary entrance" data-delay="2" id="cta-plan" type="button"
+                  data-i18n="hero.cta">Zaplanuj wyjazd</button>
+
+          <!-- Join by code -->
+          <div class="hero__join entrance" data-delay="3">
+            <div class="hero__join-row">
+              <input class="hero__join-input" type="text" id="hero-join-code"
+                     maxlength="10" autocomplete="off" spellcheck="false"
+                     data-i18n-placeholder="hero.join.placeholder" placeholder="Wpisz kod grupy">
+              <button class="btn btn--secondary btn--sm" id="hero-join-btn" type="button"
+                      data-i18n="hero.join.btn">Dołącz</button>
+            </div>
+          </div>
+
+          <!-- Demo swipe card -->
+          <div class="demo" id="demo-card-wrap">
+            <div class="demo__card" id="demo-card">
+              <div class="demo__card-body">
+                <div class="demo__card-name">Smok Wawelski</div>
+                <div class="demo__card-loc">Krakow</div>
+                <div class="demo__card-desc" data-i18n="demo.desc">Legendarna rzeźba smoka ziejącego ogniem u stóp Wawelu.</div>
+              </div>
+              <div class="card__overlay card__overlay--yes" aria-hidden="true">
+                <span class="card__overlay-label" aria-hidden="true">TAK</span>
+              </div>
+              <div class="card__overlay card__overlay--no" aria-hidden="true">
+                <span class="card__overlay-label" aria-hidden="true">NIE</span>
+              </div>
+            </div>
+            <div class="demo__result" id="demo-result"></div>
+          </div>
+          <div class="demo__hint entrance" data-delay="4" data-i18n="demo.hint">przesuń kartę w lewo lub prawo</div>
+
+          <div class="hero__links entrance" data-delay="4">
+            <a href="#howit" data-i18n="hero.link.how">Jak to działa</a>
+            <a href="#features" data-i18n="hero.link.features">Funkcje</a>
+            <a href="#team" data-i18n="hero.link.team">Zespół</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero__photo">
+        <img src="https://picsum.photos/id/1081/800/1200" alt="" class="hero__img">
+        <img src="https://picsum.photos/id/520/800/1200" alt="" class="hero__img">
+        <img src="https://picsum.photos/id/893/800/1200?grayscale" alt="" class="hero__img">
+      </div>
+    </section>
+
+    <!-- Section 1: How it Works — Itinerary on a slip -->
+    <section class="howit" id="howit">
+      <div class="howit__grid">
+        <div class="howit__text">
+          <h2 class="entrance" data-i18n="howit.heading">Twoja podróż, wydrukowana</h2>
+          <p class="entrance" data-delay="1" data-i18n="howit.paragraph">Od pomysłu do gotowego planu w kilka minut. Wybierz kierunek, a reszta dzieje się sama.</p>
+        </div>
+        <div class="howit__slip-area">
+          <div class="howit__slip entrance">
+            <div class="slip__section">
+              <div class="slip__time" data-i18n="howit.arrival">Przyjazd</div>
+              <div class="slip__row">
+                <span data-i18n="howit.choose">Wybierz cel podrozy</span>
+                <span class="slip__dots" aria-hidden="true"></span>
+                <span>2 min</span>
+              </div>
+              <div class="slip__row">
+                <span data-i18n="howit.explore">AI przeszukuje okolicy</span>
+                <span class="slip__dots" aria-hidden="true"></span>
+                <span>2 min</span>
+              </div>
+            </div>
+            <div class="slip__section">
+              <div class="slip__time" data-i18n="howit.midday">Poludnie</div>
+              <div class="slip__row">
+                <span data-i18n="howit.swipe">Grupa przesuwa karty</span>
+                <span class="slip__dots" aria-hidden="true"></span>
+                <span>5 min</span>
+              </div>
+              <div class="slip__row">
+                <span data-i18n="howit.tally">Glosy zliczone</span>
+                <span class="slip__dots" aria-hidden="true"></span>
+                <span>5 min</span>
+              </div>
+            </div>
+            <div class="slip__section">
+              <div class="slip__time" data-i18n="howit.departure">Wyjazd</div>
+              <div class="slip__row">
+                <span data-i18n="howit.build">AI buduje trase</span>
+                <span class="slip__dots" aria-hidden="true"></span>
+                <span data-i18n="howit.instant">natychmiast</span>
+              </div>
+            </div>
+            <div class="slip__final" data-i18n="howit.final">Jedna trasa, uzgodniona</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Features — Stacking colour sheets -->
+    <section class="features" id="features">
+      <h2 class="features__heading entrance" data-i18n="features.heading">Co robi AlignRoute</h2>
+      <div class="features__stack">
+
+        <!-- Sheet 1: AI Explorer -->
+        <div class="features__sheet features__sheet--surface">
+          <div class="sheet__top">
+            <span class="sheet__name entrance" data-i18n="features.ai.name">AI Explorer</span>
+          </div>
+          <div class="sheet__content">
+            <p class="sheet__desc entrance" data-delay="1" data-i18n="features.ai.desc">AI odnajduje to, co warte zobaczenia</p>
+            <div class="sheet__ui">
+              <div class="ui-explore" data-ui="explorer">
+                <div class="ui-explore__search">Krakow</div>
+                <div class="ui-explore__item">
+                  <span>Wawel Castle</span>
+                  <span>History</span>
+                </div>
+                <div class="ui-explore__item">
+                  <span>Main Market Square</span>
+                  <span>Landmark</span>
+                </div>
+                <div class="ui-explore__item ui-explore__item--highlight">
+                  <span>Kazimierz District</span>
+                  <span>Culture</span>
+                </div>
+                <div class="ui-explore__item">
+                  <span>Wieliczka Salt Mine</span>
+                  <span>Nature</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sheet 2: Group Voting -->
+        <div class="features__sheet features__sheet--ink">
+          <div class="sheet__top">
+            <span class="sheet__name entrance" data-i18n="features.voting.name">Głosowanie grupy</span>
+          </div>
+          <div class="sheet__content">
+            <p class="sheet__desc entrance" data-delay="1" data-i18n="features.voting.desc">Jedno przesunięcie na znajomego</p>
+            <div class="sheet__ui">
+              <div class="ui-vote" data-ui="voting">
+                <div class="ui-vote__card">
+                  <div class="ui-vote__name">St. Mary's Basilica</div>
+                  <div class="ui-vote__category">Religion</div>
+                  <div class="ui-vote__actions">
+                    <span class="ui-vote__no">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </span>
+                    <span class="ui-vote__yes">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    </span>
+                  </div>
+                </div>
+                <div class="ui-vote__count">3/8</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sheet 3: Smart Route -->
+        <div class="features__sheet features__sheet--accent">
+          <div class="sheet__top">
+            <span class="sheet__name entrance" data-i18n="features.route.name">Inteligentna trasa</span>
+          </div>
+          <div class="sheet__content">
+            <p class="sheet__desc entrance" data-delay="1" data-i18n="features.route.desc">Zoptymalizowane dni pod względem odległości</p>
+            <div class="sheet__ui">
+              <div class="ui-route" data-ui="itinerary">
+                <div class="ui-route__day">Day 1</div>
+                <div class="ui-route__stop">
+                  <span class="ui-route__time">09:00</span>
+                  <span>Wawel Castle</span>
+                </div>
+                <div class="ui-route__connector"></div>
+                <div class="ui-route__stop">
+                  <span class="ui-route__time">12:00</span>
+                  <span>Main Market Square</span>
+                </div>
+                <div class="ui-route__connector"></div>
+                <div class="ui-route__stop">
+                  <span class="ui-route__time">14:00</span>
+                  <span>St. Mary's Basilica</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section 3: Team — Founder's letter -->
+    <section class="letter" id="team">
+      <h2 class="letter__heading entrance" data-i18n="letter.heading">Od zespołu</h2>
+      <div class="letter__paper entrance">
+        <div class="letter__avatar" aria-hidden="true"><span>AR</span></div>
+        <div class="letter__body">
+          <p data-i18n="letter.p1">AlignRoute powstal po wycieczce do Barcelony, ktora prawie sie nie udala. Piec osob, piec roznych pomyslow na kazdy dzien. Polowa grupy chciala na plaze, reszta do muzeum.</p>
+          <p data-i18n="letter.p2">Spedzilismy wiecej czasu na kloceniu sie niz na zwiedzaniu. Po powrocie pomyslielismy — musi byc lepszy sposob.</p>
+          <p data-i18n="letter.p3">Zaczelismy od prostego pytania: co jesli kazdy moze zaglosowac na atrakcje, ktore go interesuja, a algorytm ulozy z tego sensowna trase?</p>
+          <p data-i18n="letter.p4">Tak powstal AlignRoute. Aplikacja, ktora zamienia chaos grupowego planowania w jeden, uzgodniony plan podrozy.</p>
+          <p data-i18n="letter.p5">Mamy nadzieje, ze Wasze wyjazdy beda latwiejsze niz nasz pierwszy.</p>
+        </div>
+        <div class="letter__sign" data-i18n="letter.sign">— Zespol AlignRoute</div>
+        <div class="letter__names">
+          <span>Kamila Wachulec</span>
+          <span>Mateusz Rutkowski</span>
+          <span>Konrad Typa</span>
+          <span>Ziemowit Jakuczun</span>
+        </div>
+      </div>
+      <div class="letter__dots" aria-hidden="true">
+        <span class="letter__dot"></span>
+        <span class="letter__dot"></span>
+        <span class="letter__dot"></span>
+        <span class="letter__dot"></span>
+        <span class="letter__dot"></span>
+        <span class="letter__dot"></span>
+        <span class="letter__dot"></span>
+      </div>
+      <div class="letter__tear">
+        <a href="mailto:contact@alignroute.app">contact@alignroute.app</a>
+      </div>
+    </section>
+
+    <!-- Section 4: CTA — Three photographs, then a field -->
+    <section class="cta">
+      <div class="cta__photos">
+        <img src="https://picsum.photos/id/1081/800/600" alt="" loading="lazy" class="entrance">
+        <img src="https://picsum.photos/id/520/800/600" alt="" loading="lazy" class="entrance" data-delay="1">
+        <img src="https://picsum.photos/id/893/800/600?grayscale" alt="" loading="lazy" class="entrance" data-delay="2">
+      </div>
+      <div class="cta__band">
+        <div class="cta__text entrance">
+          <span data-i18n="cta.text">Zaplanuj następną podróż razem</span><br>
+          <a href="#" id="cta-start" class="cta__link" data-i18n="cta.link">Zacznij teraz</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Footer — A footer of tiles -->
+    <footer class="footer">
+      <div class="footer__upper">
+        <div class="footer__tile footer__tile--statement entrance">
+          <p class="footer__text" data-i18n="footer.statement">AlignRoute łączy podróżników w jedną trasę</p>
+          <small class="footer__legal">&copy; 2026</small>
+        </div>
+        <div class="footer__tile footer__tile--nav entrance" data-delay="1">
+          <a href="#howit" data-i18n="hero.link.how">Jak to działa</a>
+          <a href="#features" data-i18n="hero.link.features">Funkcje</a>
+          <a href="#team" data-i18n="hero.link.team">Zespół</a>
+        </div>
+        <div class="footer__tile footer__tile--info entrance" data-delay="2" data-i18n="footer.project">
+          Projekt akademicki · 2026
+        </div>
+        <div class="footer__tile footer__tile--contact">
+          <a href="mailto:contact@alignroute.app">contact@alignroute.app</a>
+        </div>
+      </div>
+      <div class="footer__lower">
+        <div class="footer__tile footer__tile--wordmark entrance">AlignRoute</div>
+        <div class="footer__tile footer__tile--cta entrance" id="footer-cta" data-delay="1">
+          <span data-i18n="footer.trip">Zaplanuj wyjazd</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- SCREEN 2 — Create Session -->
+  <div class="screen" id="screen-create" aria-hidden="true">
+    <div class="form-screen">
+      <div class="form-panel">
+        <h2 data-i18n="create.title">Nowa sesja</h2>
+        <form id="create-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="create-destination" data-i18n="create.destination">Cel podrozy</label>
+            <input class="form-input" type="text" id="create-destination" required autocomplete="off"
+                   data-i18n-placeholder="create.destination.placeholder" placeholder="np. Krakow, Barcelona...">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="create-duration" data-i18n="create.duration">Czas trwania</label>
+            <div class="form-range-value" id="duration-value">3 dni</div>
+            <input class="form-range" type="range" id="create-duration" min="1" max="7" value="3" step="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="create-nickname" data-i18n="create.nickname">Twoj pseudonim</label>
+            <input class="form-input" type="text" id="create-nickname" required autocomplete="off"
+                   data-i18n-placeholder="create.nickname.placeholder" placeholder="np. Jan">
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="create.language">Jezyk</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" name="session-lang" value="pl" checked>
+                <span>Polski</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="session-lang" value="en">
+                <span>English</span>
+              </label>
+            </div>
+          </div>
+          <button class="btn btn--primary" type="submit" id="create-submit"
+                  style="width:100%" data-i18n="create.submit">Utworz sesje</button>
+          <button class="btn btn--ghost" type="button" id="create-back"
+                  style="width:100%;margin-top:12px" data-i18n="create.back">Powrot</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3 — Join Session -->
+  <div class="screen" id="screen-join" aria-hidden="true">
+    <div class="form-screen">
+      <div class="form-panel">
+        <h2 data-i18n="join.title">Dolacz do sesji</h2>
+        <div id="join-loading" style="text-align:center;padding:48px 0">
+          <div class="spinner spinner--lg" style="margin:0 auto 16px"></div>
+          <p class="text-muted" data-i18n="join.loading">Ladowanie sesji...</p>
+        </div>
+        <div id="join-error" style="display:none;text-align:center;padding:48px 0">
+          <p class="text-muted" data-i18n="join.error">Nie znaleziono sesji.</p>
+        </div>
+        <div id="join-form-fields" style="display:none">
+          <div id="join-info" style="margin-bottom:32px;padding:16px;background:var(--bg)">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+              <span class="text-muted" style="font-size:var(--step-small)" data-i18n="join.destination">Cel podrozy</span>
+              <strong id="join-destination"></strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+              <span class="text-muted" style="font-size:var(--step-small)" data-i18n="join.duration">Czas trwania</span>
+              <strong id="join-duration"></strong>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span class="text-muted" style="font-size:var(--step-small)" data-i18n="join.organizer">Organizator</span>
+              <strong id="join-organizer"></strong>
+            </div>
+          </div>
+          <form id="join-form" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="join-nickname" data-i18n="join.nickname">Twoj pseudonim</label>
+              <input class="form-input" type="text" id="join-nickname" required autocomplete="off"
+                     data-i18n-placeholder="join.nickname.placeholder" placeholder="np. Jan">
+            </div>
+            <button class="btn btn--primary" type="submit"
+                    style="width:100%" data-i18n="join.submit">Dolacz</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 4 — Lobby / Waiting Room -->
+  <div class="screen" id="screen-lobby" aria-hidden="true">
+    <div class="lobby">
+      <div class="container container--narrow">
+        <div class="lobby__header">
+          <h2 data-i18n="lobby.title">Poczekalnia</h2>
+          <div class="lobby__code-display">
+            <div>
+              <div style="font-size:var(--step-small);color:var(--muted)" data-i18n="lobby.code">Kod sesji</div>
+              <div class="lobby__code" id="lobby-code"></div>
+            </div>
+            <button class="btn btn--secondary btn--sm" id="lobby-copy-btn"
+                    type="button" data-i18n="lobby.copy">Kopiuj</button>
+          </div>
+          <div class="lobby__share">
+            <span data-i18n="lobby.share">Udostepnij link</span>:
+            <span id="lobby-share-link" style="word-break:break-all"></span>
+          </div>
+        </div>
+        <div class="lobby__columns">
+          <div>
+            <h3 style="font-size:var(--step-small);color:var(--muted);margin-bottom:16px"
+                data-i18n="lobby.participants">Uczestnicy</h3>
+            <ul class="lobby__participants-list" id="lobby-participants-list"></ul>
+          </div>
+        </div>
+        <div class="lobby__actions">
+          <button class="btn btn--primary btn--lg" id="lobby-start-btn" type="button"
+                  style="display:none" data-i18n="lobby.start">Rozpocznij eksploracje</button>
+        </div>
+        <div class="lobby__waiting" id="lobby-waiting-msg" style="display:none">
+          <span class="pulse-dot"></span>
+          <span data-i18n="lobby.waiting">Czekamy na organizatora...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 5 — Voting -->
+  <div class="screen" id="screen-voting" aria-hidden="true">
+    <div class="voting">
+      <div class="container">
+        <div class="voting__header">
+          <h2 data-i18n="voting.title">Glosowanie</h2>
+          <div class="voting__progress">
+            <span id="voting-progress-text">0/0</span>
+            <div class="voting__progress-bar">
+              <div class="voting__progress-fill" id="voting-progress-fill" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="voting__layout">
+          <div class="voting__main">
+            <div class="card-stack" id="card-stack">
+              <div class="card-stack__empty" data-i18n="voting.no.cards">Brak kart do glosowania</div>
+            </div>
+            <div class="voting__buttons">
+              <button class="vote-btn vote-btn--no" id="vote-no" type="button" aria-label="Vote no">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+              <button class="vote-btn vote-btn--yes" id="vote-yes" type="button" aria-label="Vote yes">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </button>
+            </div>
+            <div style="margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+              <button class="btn btn--secondary btn--sm" id="voting-done-btn" type="button"
+                      style="display:none" data-i18n="voting.done">Zakonczylem glosowanie</button>
+              <button class="btn btn--primary btn--sm" id="voting-end-btn" type="button"
+                      style="display:none" data-i18n="voting.end">Zakoncz glosowanie</button>
+            </div>
+          </div>
+          <div class="voting__sidebar">
+            <div class="voting__sidebar-section">
+              <h3 data-i18n="voting.exclude">Wyklucz kategorie</h3>
+              <div class="chips" id="exclusion-chips"></div>
+            </div>
+            <div class="voting__sidebar-section">
+              <h3 data-i18n="voting.participants">Uczestnicy</h3>
+              <div id="voting-participants"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 6 — Results / Itinerary -->
+  <div class="screen" id="screen-results" aria-hidden="true">
+    <div class="results">
+      <div class="container">
+        <div class="results__header">
+          <h2 data-i18n="results.title">Wyniki i plan podrozy</h2>
+        </div>
+        <div class="results__tabs" role="tablist">
+          <button class="results__tab results__tab--active" data-tab="summary" role="tab"
+                  data-i18n="results.summary">Podsumowanie glosowania</button>
+          <button class="results__tab" data-tab="itinerary" role="tab"
+                  data-i18n="results.itinerary">Plan dnia po dniu</button>
+          <button class="results__tab" data-tab="map" role="tab"
+                  data-i18n="results.map">Mapa</button>
+        </div>
+        <div class="results__panel results__panel--active" id="results-panel-summary">
+          <div class="results__vote-grid" id="results-vote-grid"></div>
+        </div>
+        <div class="results__panel" id="results-panel-itinerary">
+          <div class="timeline" id="results-timeline"></div>
+          <div style="text-align:center;margin-top:32px">
+            <button class="btn btn--secondary" id="results-share-btn" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              <span data-i18n="results.copy">Kopiuj plan jako tekst</span>
+            </button>
+          </div>
+        </div>
+        <div class="results__panel" id="results-panel-map">
+          <div class="results__map" id="results-map"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script src="js/utils.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/signalr-client.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/swipe.js"></script>
+  <script src="js/voting.js"></script>
+  <script src="js/results.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
