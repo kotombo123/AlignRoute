@@ -1,81 +1,57 @@
+// Program.cs — punkt startowy całego API AlignRoute.
+//
+// Tu rejestrujesz serwisy (DI), konfigurujesz middleware i mapujesz endpointy HTTP + hub SignalR.
+// Frontend na /frontend odpytuje to API pod adresem http://localhost:5038/api.
+//
+// Schemat flow:
+//   POST /api/sessions          → utwórz sesję (host)
+//   GET  /api/sessions/{code}   → pobierz info o sesji po kodzie
+//   POST /api/sessions/{code}/join → dołącz do sesji (uczestnik)
+//   POST /api/sessions/{id}/explore → start eksploracji atrakcji przez AI
+//   GET  /api/sessions/{id}/attractions → pobierz listę atrakcji
+//   POST /api/sessions/{id}/vote → oddaj głos
+//   POST /api/sessions/{id}/generate-plan → wygeneruj plan dnia po dniu przez AI
+//   GET  /api/sessions/{id}/itinerary → pobierz gotowy plan
+//
+// Real-time (SignalR) hub: /hub
+//   Klient wywołuje: JoinSessionGroup(sessionId)
+//   Serwer rozsyła do grupy: ParticipantJoined, ExplorationComplete, PlanGenerated, itd.
+
 using AlignRoute.Api.Data;
-using AlignRoute.Api.Endpoints;
 using AlignRoute.Api.Hubs;
-using AlignRoute.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Database
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+// TODO: zarejestruj DbContext (EF Core + SQLite)
+// builder.Services.AddDbContext<AppDbContext>(opt =>
+//     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// LLM settings — prefer env var over config for the API key
-var llmSettings = new LlmSettings
-{
-    BaseUrl = builder.Configuration["LlmSettings:BaseUrl"] ?? "https://llm.hpc.psnc.pl",
-    Model = builder.Configuration["LlmSettings:Model"] ?? "gpt-oss_120b",
-    ApiKey = Environment.GetEnvironmentVariable("LLM_API_KEY")
-        ?? builder.Configuration["LlmSettings:ApiKey"]
-        ?? string.Empty
-};
-builder.Services.AddSingleton(llmSettings);
+// TODO: zarejestruj SignalR
+// builder.Services.AddSignalR();
 
-// HTTP clients
-builder.Services.AddHttpClient<ILlmService, LlmService>(client =>
-{
-    client.Timeout = TimeSpan.FromSeconds(120);
-});
-builder.Services.AddHttpClient<IOverpassService, OverpassService>(client =>
-{
-    client.Timeout = TimeSpan.FromSeconds(45);
-});
+// TODO: zarejestruj CORS (frontend działa na innym porcie lub pliku)
+// builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
+//     p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
-// AI agents
-builder.Services.AddScoped<IExplorerAgent, ExplorerAgent>();
-builder.Services.AddScoped<IPlannerAgent, PlannerAgent>();
-
-// SignalR
-builder.Services.AddSignalR();
-
-// CORS
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy
-            .SetIsOriginAllowed(origin =>
-            {
-                var uri = new Uri(origin);
-                return uri.Host == "localhost" || uri.Host == "127.0.0.1";
-            })
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
-});
+// TODO: zarejestruj własne serwisy (ExplorerAgent, PlannerAgent, LlmService, itp.)
 
 var app = builder.Build();
 
-// Apply pending migrations on startup
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
-}
+// TODO: stwórz bazę przy starcie (lub użyj migracji)
+// using (var scope = app.Services.CreateScope())
+//     scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
 
-app.UseCors();
+// TODO: włącz middleware
+// app.UseCors();
 
-// Map endpoints
-app.MapGroup("/api/sessions").MapSessionEndpoints();
-app.MapGroup("/api/sessions").MapAttractionEndpoints();
-app.MapGroup("/api/sessions").MapVotingEndpoints();
-app.MapGroup("/api/sessions").MapItineraryEndpoints();
+// TODO: zamapuj endpointy, np.:
+// var sessions = app.MapGroup("/api/sessions");
+// sessions.MapPost("/", CreateSession);
+// sessions.MapGet("/{joinCode}", GetSessionByJoinCode);
+// ...
 
-// Map SignalR hub
-app.MapHub<SessionHub>("/hubs/session");
-
-// Health check
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+// TODO: zamapuj hub SignalR
+// app.MapHub<SessionHub>("/hub");
 
 app.Run();
