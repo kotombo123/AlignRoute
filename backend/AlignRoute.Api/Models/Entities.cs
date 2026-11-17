@@ -19,6 +19,7 @@ public class Participant
     public string Nickname { get; set; } = string.Empty;
     public bool IsOrganizer { get; set; }
     public bool HasFinishedVoting { get; set; }
+    public virtual Session Session { get; set; }
 }
 
 public class Attraction
