@@ -34,6 +34,7 @@
 | Real-time | SignalR |
 | LLM | PSNC `llm.hpc.psnc.pl` / model `gpt-oss_120b` (OpenAI-compatible, Bearer token) |
 | Mapy / atrakcje | OpenStreetMap + Overpass API |
+| Gateway | Caddy — serwuje frontend, proxy-uje `/api/*` i `/hub` do backendu |
 | Design | taste-skill v2 direction: "page-is-the-object" (seed 1209890472) |
 
 ---
@@ -146,24 +147,27 @@ const API_BASE = 'http://localhost:5000/api';
 
 ## Uruchomienie
 
+### Wymagania wstępne
+```bash
+brew install caddy   # jednorazowo
+```
+
 ### Backend
 ```bash
 cd backend/AlignRoute.Api
 export LLM_API_KEY="twój-klucz-psnc"
 dotnet run
-# → http://localhost:5000
+# → http://localhost:5038 (nie otwieraj bezpośrednio)
 ```
 
-### Frontend
+### Caddy Gateway
 ```bash
-cd frontend
-# opcja 1: bezpośrednio
-open index.html
-
-# opcja 2: serwer (lepsze dla SignalR)
-npx serve . -p 5500
-# → http://localhost:5500
+cd AlignRouteProj   # katalog główny (tam gdzie Caddyfile)
+caddy run
+# → http://localhost:8080  ← tutaj otwierasz aplikację
 ```
+
+Caddy serwuje pliki frontendu z `./frontend/` i proxy-uje `/api/*` oraz `/hub` do backendu na `:5038`.
 
 Frontend działa bez backendu w **mock mode** (8 atrakcji Krakowa, 3-dniowy itinerarium).
 
@@ -239,7 +243,7 @@ node ~/.claude/skills/design-taste-frontend/scripts/assets.mjs "krakow old town"
 ### Priorytet 2 — Integracja front↔back ✅ (2026-11-05)
 - [x] Podłączony klucz API PSNC (`LLM_API_KEY` env var)
 - [x] Naprawiony port: backend na 5038, frontend zaktualizowany (`api.js`, `signalr-client.js`)
-- [x] CORS — zmieniony na `SetIsOriginAllowed` dopuszczający każdy localhost (dowolny port)
+- [x] CORS — zawężony do `localhost:8080` (Caddy gateway); na produkcji: domena Caddy
 - [x] Naprawiony payload `createSession` — pole `nickname` → `organizerNickname`
 - [x] Naprawione modele EF Core — `IReadOnlyList<T>` → `List<T>` (fix "Collection was of a fixed size")
 - [x] Obsługa błędów — LLM timeout/błąd, Overpass timeout, brak atrakcji
@@ -259,20 +263,18 @@ node ~/.claude/skills/design-taste-frontend/scripts/assets.mjs "krakow old town"
 - [ ] Git init + push do `mila2023/AlignRoute`
 - [ ] README.md z instrukcjami dla zespołu (patrz `PROJECT.md` jako baza)
 - [ ] Deploy backend na mini serwer
-- [ ] CORS — dodać URL serwera do `Program.cs`
+- [ ] CORS — zaktualizować `WithOrigins(...)` w `Program.cs` o domenę produkcyjną Caddy
 
 ## Udostępnianie przez ngrok (tymczasowe testy)
 
+Wystarczy **jeden** tunel — Caddy obsługuje frontend i API na jednym porcie:
+
 ```bash
-ngrok http 5038   # → BACKEND_URL
-ngrok http 5500   # → FRONTEND_URL
+ngrok http 8080   # → https://abc123.ngrok-free.app
 ```
 
-Wpisz w `frontend/config.js`:
-```js
-window.ALIGN_API_BASE = 'https://<BACKEND_URL>/api';
-window.ALIGN_HUB_URL  = 'https://<BACKEND_URL>/hubs/session';
-```
+`frontend/config.js` zostaje pusty — nie wpisuj nic. Caddy przekierowuje
+`/api/*` i `/hub` do lokalnego backendu automatycznie.
 
 ---
 

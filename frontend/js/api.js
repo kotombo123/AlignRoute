@@ -1,9 +1,9 @@
 // api.js — Backend API communication layer
-// All calls target the .NET backend at API_BASE.
+// All calls target the gateway at API_BASE.
+// When served through Caddy (localhost:8080 or prod domain), /api/* is proxied
+// to the .NET backend automatically — no hardcoded port needed.
 
-var API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:5038/api'
-  : window.ALIGN_API_BASE || 'http://localhost:5038/api';
+var API_BASE = window.ALIGN_API_BASE || '/api';
 
 /**
  * Generic fetch wrapper with error handling.

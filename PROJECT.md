@@ -187,29 +187,44 @@ Wtedy tool calling miałoby sens. W obecnym MVP zakres jest jasno określony, wi
 
 ## Uruchomienie lokalne
 
+Aplikacja używa **Caddy** jako gateway — jeden port obsługuje i frontend, i backend.
+
+### Wymagania wstępne
 ```bash
-# Backend
+brew install caddy   # jednorazowo
+```
+
+### Uruchomienie (3 terminale)
+
+```bash
+# Terminal 1 — Backend
 cd backend/AlignRoute.Api
 export LLM_API_KEY="twój-klucz-psnc"
 dotnet run
-# → http://localhost:5038
+# → http://localhost:5038 (backend tylko, nie otwieraj bezpośrednio)
 
-# Frontend
-cd frontend
-npx serve . -p 5500
-# → http://localhost:5500
+# Terminal 2 — Caddy Gateway
+cd AlignRouteProj          # katalog główny (tam gdzie Caddyfile)
+caddy run
+# → http://localhost:8080  ← tutaj otwierasz aplikację
+
+# (Terminal 3 opcjonalnie — hot-reload Caddy config bez restartu)
+# caddy reload
 ```
+
+> **Uwaga:** Otwieraj aplikację na `http://localhost:8080`, nie na `localhost:5038`.
+> Caddy automatycznie proxy-uje `/api/*` i `/hub` do backendu.
 
 ## Udostępnianie znajomym (ngrok)
 
-```bash
-# Dwa tunele w osobnych terminalach
-ngrok http 5038   # → BACKEND_URL
-ngrok http 5500   # → FRONTEND_URL
+Wystarczy **jeden** tunel — Caddy obsługuje wszystko na jednym porcie:
 
-# Wpisz w frontend/config.js:
-# window.ALIGN_API_BASE = 'https://<BACKEND_URL>/api'
-# window.ALIGN_HUB_URL  = 'https://<BACKEND_URL>/hubs/session'
+```bash
+# Jeden tunel zamiast dwóch
+ngrok http 8080   # → https://abc123.ngrok-free.app
+
+# frontend/config.js zostaje pusty — nie trzeba niczego wpisywać.
+# Caddy przekieruje /api/* i /hub do lokalnego backendu automatycznie.
 ```
 
 ---

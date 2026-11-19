@@ -11,9 +11,13 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 
 builder.Services.AddSignalR();
 
-// CORS skonfigurowany pod SignalR (AllowCredentials wymaga konkretnego originu lub SetIsOriginAllowed)
+// CORS — Caddy działa na :8080, backend na :5038. AllowCredentials wymagane przez SignalR.
+// Na produkcji: zastąpić localhost:8080 adresem domeny Caddy.
 builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
-    p.SetIsOriginAllowed(_ => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials()));
+    p.WithOrigins("http://localhost:8080", "https://localhost:8080")
+     .AllowAnyMethod()
+     .AllowAnyHeader()
+     .AllowCredentials()));
 
 builder.Services.AddHttpClient<ExplorerAgent>();
 

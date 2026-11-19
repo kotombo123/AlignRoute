@@ -1,0 +1,16 @@
+# AlignRoute — Caddy Gateway
+# Uruchomienie: caddy run --config Caddyfile
+# Dev: http://localhost:8080
+# Prod: zmienić "localhost:8080" na domenę — Caddy sam wygeneruje HTTPS
+
+localhost:8080 {
+    # Pliki statyczne frontendu
+    root * ./frontend
+    file_server
+
+    # Proxy API → backend .NET
+    reverse_proxy /api/* localhost:5038
+
+    # Proxy SignalR hub → backend .NET (WebSocket transparentnie)
+    reverse_proxy /hub* localhost:5038
+}

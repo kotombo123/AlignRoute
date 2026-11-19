@@ -1,9 +1,9 @@
 // signalr-client.js — SignalR hub connection management
 // Connects to the session hub for real-time updates.
+// When served through Caddy, /hub is proxied to the .NET backend —
+// SignalR automatically upgrades the protocol to WebSocket.
 
-var HUB_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:5038/hubs/session'
-  : (window.ALIGN_HUB_URL || 'http://localhost:5038/hubs/session');
+var HUB_URL = window.ALIGN_HUB_URL || '/hub';
 
 var connection = null;
 var eventHandlers = {};
