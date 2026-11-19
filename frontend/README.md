@@ -4,19 +4,26 @@ Smart group travel planning assistant — discover attractions, vote together, a
 
 ## Quick Start
 
-No build tools required. Open the app directly in a browser:
+The frontend is served by **Caddy**, which also proxies API and SignalR traffic
+to the .NET backend. Run both from the project root:
 
 ```bash
-# Option 1: Open directly
-open index.html
+# Terminal 1 — Backend (from backend/AlignRoute.Api/)
+dotnet run
 
-# Option 2: Use any static server
-npx serve .
-# or
-python3 -m http.server 8080
+# Terminal 2 — Caddy Gateway (from project root, where Caddyfile lives)
+caddy run
+
+# Open in browser:
+# http://localhost:8080
 ```
 
-The app expects the backend at `http://localhost:5000`. Without the backend, the app runs in **mock mode** with sample Krakow data.
+Install Caddy once: `brew install caddy`
+
+> **Do not** open `index.html` directly or use `npx serve` / `python3 -m http.server` —
+> those bypass the gateway and break API and SignalR connections.
+
+Without the backend running, the app falls back to **mock mode** with sample Krakow data.
 
 ## File Structure
 
@@ -50,16 +57,14 @@ frontend/
 
 ## Backend API
 
-Configure the backend URL in `js/api.js`:
+API and SignalR are routed through Caddy using relative paths — no hardcoded
+URLs needed. The gateway config lives in `Caddyfile` at the project root.
+
+If you need to point to a backend on a different host, override in `config.js`:
 
 ```javascript
-var API_BASE = 'http://localhost:5000/api';
-```
-
-The SignalR hub URL is in `js/signalr-client.js`:
-
-```javascript
-var HUB_URL = 'http://localhost:5000/hubs/session';
+window.ALIGN_API_BASE = 'https://your-host/api';
+window.ALIGN_HUB_URL  = 'https://your-host/hub';
 ```
 
 ## Language Support

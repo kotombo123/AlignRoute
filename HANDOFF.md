@@ -164,7 +164,7 @@ dotnet run
 ```bash
 cd AlignRouteProj   # katalog główny (tam gdzie Caddyfile)
 caddy run
-# → http://localhost:8080  ← tutaj otwierasz aplikację
+# → https://localhost:8080  ← tutaj otwierasz aplikację
 ```
 
 Caddy serwuje pliki frontendu z `./frontend/` i proxy-uje `/api/*` oraz `/hub` do backendu na `:5038`.
