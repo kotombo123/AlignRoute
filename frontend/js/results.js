@@ -11,6 +11,16 @@ function normalizeItinerary(data) {
 
   var rawDays = data.plan || [];
 
+  if (data.planJson && typeof data.planJson === 'string') {
+    try {
+      var cleanString = data.planJson.replace(/```json/gi, '').replace(/```/g, '').trim();
+      var parsed = JSON.parse(cleanString);
+      rawDays = parsed.plan || [];
+    } catch (err) {
+      console.error("Nie udało się odczytać wygenerowanego planu:", err);
+    }
+  }
+  
   var coordMap = {};
   state.attractions.forEach(function (a) {
     coordMap[String(a.id)] = { lat: a.lat || 0, lon: a.lon || 0 };

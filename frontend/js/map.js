@@ -26,7 +26,10 @@ function initMap(containerId, lat, lon, zoom) {
     console.warn('[Map] Leaflet not loaded — map features disabled.');
     return null;
   }
-
+  var container = L.DomUtil.get(containerId);
+  if (container != null && container._leaflet_id !== null) {
+      container.outerHTML = container.outerHTML;
+  }
   var map = L.map(containerId, {
     scrollWheelZoom: true,
     zoomControl: true,
